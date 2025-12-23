@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipes</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle at center, purple, black);
+            color: silver;
+        }
+    </style>
+</head>
+<body>
+    <h1>Recipes by ID</h1>
+    {% for recipe in recipe_list %}
+        {{ recipe }}
+        <br>
+        <br>
+    {% endfor %}
+</body>

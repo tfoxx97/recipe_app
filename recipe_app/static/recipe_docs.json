@@ -1,0 +1,338 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Recipe API",
+        "description": "Guide to help navigate all possible routes in recipe website.",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/ or /recipes": {
+            "get": {
+                "description": "Returns all recipes found in database",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Recipe"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No recipes found"
+                    }
+                }
+            }
+        },
+        "/recipe/{recipe_id}": {
+            "get": {
+                "description": "Returns recipe that can be found by searching its assigned ID.",
+                "parameters": [
+                    {
+                        "name": "recipe_id",
+                        "in": "path",
+                        "required": "True",
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "ID for recipe can be found using `/index` route"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/Recipe"
+                        }
+                    },
+                    "404": {
+                        "description": "No recipe found"
+                    }
+                }
+            }
+        },
+        "/recipes/{category}": {
+            "get": {
+                "description": "Returns all recipes that belong to a specified `category`",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": "True",
+                        "type": "string",
+                        "minimum": 1,
+                        "description": "Recipes that fall under `category` (list of categories can be found at route `/categories`)"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Recipe"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No recipe(s) found"
+                    }
+                }
+            }
+        },
+        "/index": {
+            "get": {
+                "description": "Lookup table to find the ID assigned to all recipes",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "examples": {
+                            "application/json": {"name": "sesame chicken with asian sticky sauce", "id": 1}
+                        }
+                    },
+                    "404": {
+                        "description": "No recipe(s) found"
+                    }
+                }
+            }
+        },
+        "/add-recipe": {
+            "get": {
+                "description": "Display HTML page used to add recipes to database.",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Page not found"
+                    }
+                }
+            },
+            "post": {
+                "description": "Add to the database a new recipe with ingredients. Organized based on `category` specified",
+                "parameters": [
+                    {
+                        "name": "recipe",
+                        "in": "body",
+                        "required": "True",
+                        "type": "object",
+                        "minimum": 1,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Recipe"
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful operation. Returns confirmation of data sent.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Recipe"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error when client attempts to create recipe"
+                    }
+                }
+            }
+        },
+        "/update-recipe/{recipe}": {
+            "post": {
+                "description": "Make changes to already existing `Recipe` data or add, modify, and possibly delete `Ingredients`.",
+                "parameters": [
+                    {
+                        "name": "recipe",
+                        "in": "body",
+                        "required": "True",
+                        "type": "object",
+                        "minimum": 1,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Recipe"
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful operation. Returns confirmation of data sent.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Recipe"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error when client attempts to create recipe"
+                    }
+                }
+            }
+        },
+        "/delete-recipe/{recipe}": {
+            "delete": {
+                "description": "Request to remove a recipe from the `Recipe` database. Will also remove ingredients that have the same recipe ID.",
+                "parameters": [
+                    {
+                        "name": "recipe",
+                        "in": "body",
+                        "required": "True",
+                        "type": "object",
+                        "minimum": 1,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Recipe"
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body to be deleted."
+                    }
+                }
+            }
+        },
+        "/search": {
+            "get": {
+                "description": "Return recipe(s) using a keyword that can be found in the title of a recipe.",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation. Returns confirmation of data sent.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Recipe"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No recipe(s) found."
+                    }
+                }
+            },
+            "post": {
+                "description": "Request recipe(s) using a keyword that can be found in the title of a recipe."
+            }
+        },
+        "/categories": {
+            "get": {
+                "description": "Return a list of all the possible categories.",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation. Returns confirmation of data sent.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Categories"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error when client attempts to get categories."
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Recipe": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Chicken Sesame with Asian Sticky Sauce"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "sesame chicken with a blend of sweet chili sauce and some extra tangy flavors"
+                },
+                "category": {
+                    "type": "string",
+                    "example": "dinner"
+                },
+                "ingredients": {
+                    "type": "object",
+                    "example": {
+                        "$ref": "#/definitions/Ingredients"
+                    }
+                },
+                "instructions": {
+                    "type": "string",
+                    "example": "Heat the oil in a wok or large frying pan until very hot. Whilst the oil is heating, place the egg in one shallow bowl and the cornflour in another shallow bowl..."
+                },
+                "servings": {
+                    "type": "integer",
+                    "example": 4
+                }
+            }
+        },
+        "Ingredients": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "string",
+                    "example": "1/2 tbsp"
+                },
+                "ingredient_name": {
+                    "type": "string",
+                    "example": "salt"
+                },
+                "recipe_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "Categories": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "dinner"
+                }
+            }
+        }
+    }
+}

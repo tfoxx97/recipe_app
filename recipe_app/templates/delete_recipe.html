@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif;
+            background: radial-gradient(circle at center, purple, black);
+            color: silver;
+        }
+        .recipe { border: 1px solid #ddd; padding: 15px; margin: 15px 0; }
+        .recipe h1 h2 { margin: 0; color: silver;}
+        .recipe h5 { margin: 5px 0; color: silver;}
+    </style>
+</head>
+<body>
+    <h1>Delete Recipe</h1>
+    <h2>Are you sure you want to delete this recipe?</h2>
+    <div id="recipe-container">
+        <h5>Name</h5>
+        {{ recipe.name }}
+        <br>
+        <h5>Description</h5>
+        {{ recipe.description | safe }}
+        <br>
+        <h5>Ingredients</h5>
+        {% if recipe.ingredients %}
+            {% for ing in recipe.ingredients %}
+                <br>
+                {{ ing.quantity }}
+                {{ ing.ingredient_name }}
+            {% endfor %}
+        {% else %}
+            <em>No ingredients.</em>
+        {% endif %}
+        <br>
+        <h5>Servings</h5>
+        {{ recipe.servings }}
+        <br>
+        <h5>Instructions</h5>
+        {{ recipe.instructions | safe }}
+        <br>
+        <br>
+    </div>
+    <form method="POST" action="" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.yes(class="btn btn-outline-info") }}
+            {{ form.no(class="btn btn-outline-info") }}
+        </div>
+    </form> 
+</body>

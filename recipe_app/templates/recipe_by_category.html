@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipes</title>
+    <style>
+        .return-home {
+            padding-top: 5px;
+            padding-left: 105px;
+        }
+        .recipe { 
+            font-family: 'Rubik', sans-serif;
+            border: 5px solid rgb(11, 216, 127); 
+            padding-left: 105px;
+            padding-right: 105px;
+            padding-top: 25px;
+            padding-bottom: 25px;
+            margin: 75px 90px;
+        }
+        .recipe h2 { margin: 0; }
+        .recipe p { margin: 5px 0; }
+        .navbar { 
+            font-family: 'Rubik', sans-serif; 
+            background: radial-gradient(circle at right, rgb(11, 216, 127), white); 
+        }
+        .pagination{
+            margin-left: 25px;
+            padding-top: 25px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</head>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand"><h1> {{ category.capitalize() }} Recipes</h1></a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('add_recipe') }}">Add Recipe</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('index') }}">Get Recipe by ID</a>
+            </li>
+        </ul>
+        <form method="POST" action=" {{ url_for('search') }}" class="form-inline my-2 my-lg-0" style="padding: 30px; float: right;">
+            <input class="form-control me-2" type="search" placeholder="Search by recipe name" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results" hx-indicator=".loading_spinner">
+            <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </nav>
+</header>
+<body>
+        <div class="return-home">
+            <a href="{{ url_for('recipes') }}" class="btn btn-primary">&laquo; Home</a>
+        </div>
+        {% for recipe in recipes %}
+        <div class="recipe">
+            <h2><a class="recipe-name" href="{{ url_for('get_recipe_by_id', recipe_id=recipe.id) }}" style="color: black">{{ capitalize_title(recipe.name) }}</a></h2>
+            <p><strong>Description: </strong>{{ recipe.description | safe }}</p>
+            <p><strong>Category: </strong>{{ recipe.category }}</p>
+            {% if recipe.ingredients %}
+                <p><strong>Ingredients: </strong>{% for ingredient in recipe.ingredients %}
+                    <ul>
+                        <li>{{ ingredient.quantity }} {{ ingredient.ingredient_name }}</li>
+                    </ul>
+                    {% endfor %}
+                </p>
+            {% else %}
+                <em>No ingredients.</em>
+            {% endif %}
+            <p><strong>Instructions:</strong> {{ recipe.instructions | safe }}</p>
+            <p><strong>Serves: </strong>{{ recipe.servings }}</p>
+        </div>
+        {% endfor %}
+        <div class="pagination">
+            {% for page_num in recipes.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                    {% if recipes.page == page_num %}
+                        <a class="btn btn-info mb4" href="{{ url_for('recipes', page=page_num) }}">{{ page_num }}</a>
+                    {% else %}
+                        <a class="btn btn-outline-info mb4" href="{{ url_for('recipes', page=page_num) }}">{{ page_num }}</a>
+                    {% endif %}
+                {% else %}
+                    ...
+                {% endif %}
+            {% endfor %}
+        </div>      
+</body>
+</html>

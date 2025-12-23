@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Recipe Calendar</title>
+    <style>
+        h1 { 
+            font-family: 'Rubik', sans-serif;
+            padding-left: 5px;
+        }
+        .navbar { 
+            font-family: 'Rubik', sans-serif;
+            background: radial-gradient(circle at right, rgb(11, 216, 127), white); 
+        }
+        .home-header {
+            padding-left: 25px;
+            padding-bottom: 50px;
+        }
+       
+        .weekly-calendar-section {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            font-family: 'Rubik', sans-serif;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .weekly-calendar-section > div {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+            background-color: rgb(11, 216, 127);
+            border: 2px solid transparent;
+        }
+
+        .clear-meal-plan {
+            font-family: 'Rubik', sans-serif;
+            padding-top: 50px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .dropdown-content {
+            position: relative;
+            border-radius: 5px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</head>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand"><h1>Weekly Meal Plan</h1></a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('add_recipe') }}">Add Recipe</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('index') }}">Get Recipe by ID</a>
+            </li>
+        </ul>
+        <form method="POST" action=" {{ url_for('search') }}" class="form-inline my-2 my-lg-0" style="padding: 30px; float: right;">
+            <input class="form-control me-2" type="search" placeholder="Search by recipe name" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results" hx-indicator=".loading_spinner">
+            <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </nav>
+</header>
+<body>
+    <div class="meal-container">
+        <div class="home-header">
+            <a href="{{ url_for('recipes') }}" class="btn btn-success" style="font-family: 'Rubik', sans-serif;">&laquo; Home</a>
+        </div>
+
+        <div class="weekly-calendar-section">
+            <div class="Sun" style="font-size: larger;">
+                Sun
+                <div class="card" style="height: 55rem; width: 95%;">
+                    <div class="card-body">
+                        <div class="breakfast-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Breakfast:</h5>
+                            <h5 id="sun-header-b">No recipe added yet</h5>
+                            <br>
+                            <br> 
+                        </div>
+                        <br>
+                        <div class="lunch-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Lunch:</h5>
+                            <h5 id="sun-header-l">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="dinner-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Dinner:</h5>
+                            <h5 id="sun-header-d">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="add-new-recipe">
+                            <button class="btn btn-primary" id="Sunday-recipe">Add Recipe</button>
+                            <br>
+                            <br>
+                            <select id="recipe-categories-sun" class="recipe-categories" onchange="toggleMeal('Sun')">
+                                <option>--Select meal--</option>
+                                <option>Breakfast</option>
+                                <option>Lunch</option>
+                                <option>Dinner</option>
+                            </select>
+                            <br>
+                            <select id="dropdown-content-sun-b" class="dropdown-content-b">
+                                <option value="">--Choose a recipe--</option>
+                                {% for breakfasts in breakfast.keys() %}
+                                    <option>{{ breakfasts }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-sun-l" class="dropdown-content-l">
+                                <option value="">--Choose a recipe--</option>
+                                {% for lunches in lunch.keys() %}
+                                    <option>{{ lunches }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-sun-d" class="dropdown-content-d">
+                                <option value="">--Choose a recipe--</option>
+                                {% for dinners in dinner.keys() %}
+                                    <option>{{ dinners }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <button class="btn btn-success" id="submit-sun">Submit</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="Mon" style="font-size: larger;">
+                Mon
+                <div class="card" style="height: 55rem; width: 95%;">
+                    <div class="card-body">
+                        <div class="breakfast-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Breakfast:</h5>
+                            <h5 id="mon-header-b">No recipe added yet</h5>
+                            <br>
+                            <br> 
+                        </div>
+                        <br>
+                        <div class="lunch-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Lunch:</h5>
+                            <h5 id="mon-header-l">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="dinner-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Dinner:</h5>
+                            <h5 id="mon-header-d">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="add-new-recipe">
+                            <button class="btn btn-primary" id="Monday-recipe">Add Recipe</button>
+                            <br>
+                            <br>
+                            <select id="recipe-categories-mon" class="recipe-categories" onchange="toggleMeal('Mon')">
+                                <option>--Select meal--</option>
+                                <option>Breakfast</option>
+                                <option>Lunch</option>
+                                <option>Dinner</option>
+                            </select>
+                            <br>
+                            <select id="dropdown-content-mon-b" class="dropdown-content-b">
+                                <option value="">--Choose a recipe--</option>
+                                {% for breakfasts in breakfast.keys() %}
+                                    <option>{{ breakfasts }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-mon-l" class="dropdown-content-l">
+                                <option value="">--Choose a recipe--</option>
+                                {% for lunches in lunch.keys() %}
+                                    <option>{{ lunches }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-mon-d" class="dropdown-content-d">
+                                <option value="">--Choose a recipe--</option>
+                                {% for dinners in dinner.keys() %}
+                                    <option>{{ dinners }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <button class="btn btn-success" id="submit-mon">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="Tues" style="font-size: larger;">
+                Tues
+                <div class="card" style="height: 55rem; width: 95%;">
+                    <div class="card-body">
+                        <div class="breakfast-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Breakfast:</h5>
+                            <h5 id="tues-header-b">No recipe added yet</h5>
+                            <br>
+                            <br> 
+                        </div>
+                        <br>
+                        <div class="lunch-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Lunch:</h5>
+                            <h5 id="tues-header-l">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="dinner-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Dinner:</h5>
+                            <h5 id="tues-header-d">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="add-new-recipe">
+                            <button class="btn btn-primary" id="Tuesday-recipe">Add Recipe</button>
+                            <br>
+                            <br>
+                            <select id="recipe-categories-tues" class="recipe-categories" onchange="toggleMeal('Tues')">
+                                <option>--Select meal--</option>
+                                <option>Breakfast</option>
+                                <option>Lunch</option>
+                                <option>Dinner</option>
+                            </select>
+                            <br>
+                            <select id="dropdown-content-tues-b" class="dropdown-content-b">
+                                <option value="">--Choose a recipe--</option>
+                                {% for breakfasts in breakfast.keys() %}
+                                    <option>{{ breakfasts }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-tues-l" class="dropdown-content-l">
+                                <option value="">--Choose a recipe--</option>
+                                {% for lunches in lunch.keys() %}
+                                    <option>{{ lunches }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-tues-d" class="dropdown-content-d">
+                                <option value="">--Choose a recipe--</option>
+                                {% for dinners in dinner.keys() %}
+                                    <option>{{ dinners }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <button class="btn btn-success" id="submit-tues">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="Wed" style="font-size: larger;">
+                Wed
+                <div class="card" style="height: 55rem; width: 95%;">
+                    <div class="card-body">
+                        <div class="breakfast-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Breakfast:</h5>
+                            <h5 id="wed-header-b">No recipe added yet</h5>
+                            <br>
+                            <br> 
+                        </div>
+                        <br>
+                        <div class="lunch-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Lunch:</h5>
+                            <h5 id="wed-header-l">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="dinner-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Dinner:</h5>
+                            <h5 id="wed-header-d">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="add-new-recipe">
+                            <button class="btn btn-primary" id="Wednesday-recipe">Add Recipe</button>
+                            <br>
+                            <br>
+                            <select id="recipe-categories-wed" class="recipe-categories" onchange="toggleMeal('Wed')">
+                                <option>--Select meal--</option>
+                                <option>Breakfast</option>
+                                <option>Lunch</option>
+                                <option>Dinner</option>
+                            </select>
+                            <br>
+                            <select id="dropdown-content-wed-b" class="dropdown-content-b">
+                                <option value="">--Choose a recipe--</option>
+                                {% for breakfasts in breakfast.keys() %}
+                                    <option>{{ breakfasts }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-wed-l" class="dropdown-content-l">
+                                <option value="">--Choose a recipe--</option>
+                                {% for lunches in lunch.keys() %}
+                                    <option>{{ lunches }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-wed-d" class="dropdown-content-d">
+                                <option value="">--Choose a recipe--</option>
+                                {% for dinners in dinner.keys() %}
+                                    <option>{{ dinners }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <button class="btn btn-success" id="submit-wed">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="Thur" style="font-size: larger;">
+                Thur
+                <div class="card" style="height: 55rem; width: 95%;">
+                    <div class="card-body">
+                        <div class="breakfast-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Breakfast:</h5>
+                            <h5 id="thur-header-b">No recipe added yet</h5>
+                            <br>
+                            <br> 
+                        </div>
+                        <br>
+                        <div class="lunch-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Lunch:</h5>
+                            <h5 id="thur-header-l">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="dinner-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Dinner:</h5>
+                            <h5 id="thur-header-d">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="add-new-recipe">
+                            <button class="btn btn-primary" id="Thursday-recipe">Add Recipe</button>
+                            <br>
+                            <br>
+                            <select id="recipe-categories-thur" class="recipe-categories" onchange="toggleMeal('Thur')">
+                                <option>--Select meal--</option>
+                                <option>Breakfast</option>
+                                <option>Lunch</option>
+                                <option>Dinner</option>
+                            </select>
+                            <br>
+                            <select id="dropdown-content-thur-b" class="dropdown-content-b">
+                                <option value="">--Choose a recipe--</option>
+                                {% for breakfasts in breakfast.keys() %}
+                                    <option>{{ breakfasts }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-thur-l" class="dropdown-content-l">
+                                <option value="">--Choose a recipe--</option>
+                                {% for lunches in lunch.keys() %}
+                                    <option>{{ lunches }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-thur-d" class="dropdown-content-d">
+                                <option value="">--Choose a recipe--</option>
+                                {% for dinners in dinner.keys() %}
+                                    <option>{{ dinners }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <button class="btn btn-success" id="submit-thur">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="Fri" style="font-size: larger;">
+                Fri
+                <div class="card" style="height: 55rem; width: 95%;">
+                    <div class="card-body">
+                        <div class="breakfast-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Breakfast:</h5>
+                            <h5 id="fri-header-b">No recipe added yet</h5>
+                            <br>
+                            <br> 
+                        </div>
+                        <br>
+                        <div class="lunch-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Lunch:</h5>
+                            <h5 id="fri-header-l">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="dinner-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Dinner:</h5>
+                            <h5 id="fri-header-d">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="add-new-recipe">
+                            <button class="btn btn-primary" id="Friday-recipe">Add Recipe</button>
+                            <br>
+                            <br>
+                            <select id="recipe-categories-fri" class="recipe-categories" onchange="toggleMeal('Fri')">
+                                <option>--Select meal--</option>
+                                <option>Breakfast</option>
+                                <option>Lunch</option>
+                                <option>Dinner</option>
+                            </select>
+                            <br>
+                            <select id="dropdown-content-fri-b" class="dropdown-content-b">
+                                <option value="">--Choose a recipe--</option>
+                                {% for breakfasts in breakfast.keys() %}
+                                    <option>{{ breakfasts }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-fri-l" class="dropdown-content-l">
+                                <option value="">--Choose a recipe--</option>
+                                {% for lunches in lunch.keys() %}
+                                    <option>{{ lunches }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-fri-d" class="dropdown-content-d">
+                                <option value="">--Choose a recipe--</option>
+                                {% for dinners in dinner.keys() %}
+                                    <option>{{ dinners }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <button class="btn btn-success" id="submit-fri">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="Sat" style="font-size: larger;">
+                Sat
+                <div class="card" style="height: 55rem; width: 95%;">
+                    <div class="card-body">
+                        <div class="breakfast-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Breakfast:</h5>
+                            <h5 id="sat-header-b">No recipe added yet</h5>
+                            <br>
+                            <br> 
+                        </div>
+                        <br>
+                        <div class="lunch-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Lunch:</h5>
+                            <h5 id="sat-header-l">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="dinner-content" style="border: 0.5mm outset rgb(11, 216, 127); padding: 5%;">
+                            <h5 style="font-weight: bold;">Dinner:</h5>
+                            <h5 id="sat-header-d">No recipe added yet</h5>
+                            <br>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="add-new-recipe">
+                            <button class="btn btn-primary" id="Saturday-recipe">Add Recipe</button>
+                            <br>
+                            <br>
+                            <select id="recipe-categories-sat" class="recipe-categories" onchange="toggleMeal('Sat')">
+                                <option>--Select meal--</option>
+                                <option>Breakfast</option>
+                                <option>Lunch</option>
+                                <option>Dinner</option>
+                            </select>
+                            <br>
+                            <select id="dropdown-content-sat-b" class="dropdown-content-b">
+                                <option value="">--Choose a recipe--</option>
+                                {% for breakfasts in breakfast.keys() %}
+                                    <option>{{ breakfasts }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-sat-l" class="dropdown-content-l">
+                                <option value="">--Choose a recipe--</option>
+                                {% for lunches in lunch.keys() %}
+                                    <option>{{ lunches }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="dropdown-content-sat-d" class="dropdown-content-d">
+                                <option value="">--Choose a recipe--</option>
+                                {% for dinners in dinner.keys() %}
+                                    <option>{{ dinners }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <button class="btn btn-success" id="submit-sat">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clear-meal-plan">
+            <button class="btn btn-danger" onclick="clearMealPlan()">Clear Meal Plan</button>
+        </div>
+    </div>
+    <script>
+        const submitRecipe = document.querySelectorAll("button[id*=submit]");
+        submitRecipe.forEach(submit => {
+            submit.style.display = "none";
+        })
+
+        submitRecipe.forEach(submit => {
+            submit.addEventListener('click', (event) =>{
+                const submitButtonID = event.target.id;
+
+                switch(submitButtonID) {
+                    case "submit-sun":
+                        breakfastHeader = document.getElementById("sun-header-b");
+                        lunchHeader = document.getElementById("sun-header-l");
+                        dinnerHeader = document.getElementById("sun-header-d");
+
+                        selectBreakfast = document.querySelector("select[id*=dropdown-content-sun-b]");
+                        selectLunch = document.querySelector("select[id*=dropdown-content-sun-l]");
+                        selectDinner = document.querySelector("select[id*=dropdown-content-sun-d]");
+
+                        if (selectBreakfast.style.display === "block") {
+                            if (selectBreakfast.value) {
+                                var breakfastItems = {{ breakfast | safe }};
+                                var breakfastID = breakfastItems[selectBreakfast.value];
+                                breakfastHeader.innerHTML = `
+                                <a id="breakfast-link-sun" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectBreakfast.value}
+                                </a>`
+                                document.getElementById("breakfast-link-sun").href = document
+                                .getElementById("breakfast-link-sun")
+                                .href
+                                .replace('id', breakfastID);
+                                // add new header to localStorage so recipe added to header survives page refresh
+                                saveHeader(breakfastHeader.id, breakfastHeader.innerHTML);
+                            }    
+                        }
+
+                        if (selectLunch.style.display === "block") {
+                            if (selectLunch.value) {
+                                var lunchItems = {{ lunch | safe }};
+                                var lunchID = lunchItems[selectLunch.value];
+                                lunchHeader.innerHTML = `
+                                <a id="lunch-link-sun" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectLunch.value}
+                                </a>`
+                                document.getElementById("lunch-link-sun").href = document
+                                .getElementById("lunch-link-sun")
+                                .href
+                                .replace('id', lunchID);
+                                saveHeader(lunchHeader.id, lunchHeader.innerHTML);
+                            }
+                        }
+
+                        if (selectDinner.style.display === "block") {
+                            if (selectDinner.value) {
+                                var dinnerItems = {{ dinner | safe }};
+                                var dinnerID = dinnerItems[selectDinner.value];
+                                dinnerHeader.innerHTML = `
+                                <a id="dinner-link-sun" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectDinner.value}
+                                </a>`
+                                document.getElementById("dinner-link-sun").href = document
+                                .getElementById("dinner-link-sun")
+                                .href
+                                .replace('id', dinnerID);
+                                saveHeader(dinnerHeader.id, dinnerHeader.innerHTML);
+                            }
+                        }
+                        break;
+
+                    case "submit-mon":
+                        breakfastHeader = document.getElementById("mon-header-b");
+                        lunchHeader = document.getElementById("mon-header-l");
+                        dinnerHeader = document.getElementById("mon-header-d");
+
+                        selectBreakfast = document.querySelector("select[id*=dropdown-content-mon-b]");
+                        selectLunch = document.querySelector("select[id*=dropdown-content-mon-l]");
+                        selectDinner = document.querySelector("select[id*=dropdown-content-mon-d]");
+
+                        if (selectBreakfast.style.display === "block") {
+                            if (selectBreakfast.value) {
+                                var breakfastItems = {{ breakfast | safe }};
+                                var breakfastID = breakfastItems[selectBreakfast.value];
+                                breakfastHeader.innerHTML = `
+                                <a id="breakfast-link-mon" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectBreakfast.value}
+                                </a>`
+                                document.getElementById("breakfast-link-mon").href = document
+                                .getElementById("breakfast-link-mon")
+                                .href
+                                .replace('id', breakfastID);
+                                saveHeader(breakfastHeader.id, breakfastHeader.innerHTML);
+                            }    
+                        }
+
+                        if (selectLunch.style.display === "block") {
+                            if (selectLunch.value) {
+                                var lunchItems = {{ lunch | safe }};
+                                var lunchID = lunchItems[selectLunch.value];
+                                lunchHeader.innerHTML = `
+                                <a id="lunch-link-mon" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectLunch.value}
+                                </a>`
+                                document.getElementById("lunch-link-mon").href = document
+                                .getElementById("lunch-link-mon")
+                                .href
+                                .replace('id', lunchID);
+                                saveHeader(lunchHeader.id, lunchHeader.innerHTML);
+                            }
+                        }
+
+                        if (selectDinner.style.display === "block") {
+                            if (selectDinner.value) {
+                                var dinnerItems = {{ dinner | safe }};
+                                var dinnerID = dinnerItems[selectDinner.value];
+                                dinnerHeader.innerHTML = `
+                                <a id="dinner-link-mon" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectDinner.value}
+                                </a>`
+                                document.getElementById("dinner-link-mon").href = document
+                                .getElementById("dinner-link-mon")
+                                .href
+                                .replace('id', dinnerID);
+                                saveHeader(dinnerHeader.id, dinnerHeader.innerHTML);
+                            }
+                        }
+                        break;
+
+                    case "submit-tues":
+                        breakfastHeader = document.getElementById("tues-header-b");
+                        lunchHeader = document.getElementById("tues-header-l");
+                        dinnerHeader = document.getElementById("tues-header-d");
+
+                        selectBreakfast = document.querySelector("select[id*=dropdown-content-tues-b]");
+                        selectLunch = document.querySelector("select[id*=dropdown-content-tues-l]");
+                        selectDinner = document.querySelector("select[id*=dropdown-content-tues-d]");
+
+                        if (selectBreakfast.style.display === "block") {
+                            if (selectBreakfast.value) {
+                                var breakfastItems = {{ breakfast | safe }};
+                                var breakfastID = breakfastItems[selectBreakfast.value];
+                                breakfastHeader.innerHTML = `
+                                <a id="breakfast-link-tues" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectBreakfast.value}
+                                </a>`
+                                document.getElementById("breakfast-link-tues").href = document
+                                .getElementById("breakfast-link-tues")
+                                .href
+                                .replace('id', breakfastID);
+                                saveHeader(breakfastHeader.id, breakfastHeader.innerHTML);
+                            }    
+                        }
+
+                        if (selectLunch.style.display === "block") {
+                            if (selectLunch.value) {
+                                var lunchItems = {{ lunch | safe }};
+                                var lunchID = lunchItems[selectLunch.value];
+                                lunchHeader.innerHTML = `
+                                <a id="lunch-link-tues" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectLunch.value}
+                                </a>`
+                                document.getElementById("lunch-link-tues").href = document
+                                .getElementById("lunch-link-tues")
+                                .href
+                                .replace('id', lunchID);
+                                saveHeader(lunchHeader.id, lunchHeader.innerHTML);
+                            }
+                        }
+
+                        if (selectDinner.style.display === "block") {
+                            if (selectDinner.value) {
+                                var dinnerItems = {{ dinner | safe }};
+                                var dinnerID = dinnerItems[selectDinner.value];
+                                dinnerHeader.innerHTML = `
+                                <a id="dinner-link-tues" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectDinner.value}
+                                </a>`
+                                document.getElementById("dinner-link-tues").href = document
+                                .getElementById("dinner-link-tues")
+                                .href
+                                .replace('id', dinnerID);
+                                saveHeader(dinnerHeader.id, dinnerHeader.innerHTML);
+                            }
+                        }
+                        break;
+
+                    case "submit-wed":
+                        breakfastHeader = document.getElementById("wed-header-b");
+                        lunchHeader = document.getElementById("wed-header-l");
+                        dinnerHeader = document.getElementById("wed-header-d");
+
+                        selectBreakfast = document.querySelector("select[id*=dropdown-content-wed-b]");
+                        selectLunch = document.querySelector("select[id*=dropdown-content-wed-l]");
+                        selectDinner = document.querySelector("select[id*=dropdown-content-wed-d]");
+
+                        if (selectBreakfast.style.display === "block") {
+                            if (selectBreakfast.value) {
+                                var breakfastItems = {{ breakfast | safe }};
+                                var breakfastID = breakfastItems[selectBreakfast.value];
+                                breakfastHeader.innerHTML = `
+                                <a id="breakfast-link-wed" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectBreakfast.value}
+                                </a>`
+                                document.getElementById("breakfast-link-wed").href = document
+                                .getElementById("breakfast-link-wed")
+                                .href
+                                .replace('id', breakfastID);
+                                saveHeader(breakfastHeader.id, breakfastHeader.innerHTML);
+                            }    
+                        }
+
+                        if (selectLunch.style.display === "block") {
+                            if (selectLunch.value) {
+                                var lunchItems = {{ lunch | safe }};
+                                var lunchID = lunchItems[selectLunch.value];
+                                lunchHeader.innerHTML = `
+                                <a id="lunch-link-wed" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectLunch.value}
+                                </a>`
+                                document.getElementById("lunch-link-wed").href = document
+                                .getElementById("lunch-link-wed")
+                                .href
+                                .replace('id', lunchID);
+                                saveHeader(lunchHeader.id, lunchHeader.innerHTML);
+                            }
+                        }
+
+                        if (selectDinner.style.display === "block") {
+                            if (selectDinner.value) {
+                                var dinnerItems = {{ dinner | safe }};
+                                var dinnerID = dinnerItems[selectDinner.value];
+                                dinnerHeader.innerHTML = `
+                                <a id="dinner-link-wed" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectDinner.value}
+                                </a>`
+                                document.getElementById("dinner-link-wed").href = document
+                                .getElementById("dinner-link-wed")
+                                .href
+                                .replace('id', dinnerID);
+                                saveHeader(dinnerHeader.id, dinnerHeader.innerHTML);
+                            }
+                        }
+                        break;
+
+                    case "submit-thur":
+                        breakfastHeader = document.getElementById("thur-header-b");
+                        lunchHeader = document.getElementById("thur-header-l");
+                        dinnerHeader = document.getElementById("thur-header-d");
+
+                        selectBreakfast = document.querySelector("select[id*=dropdown-content-thur-b]");
+                        selectLunch = document.querySelector("select[id*=dropdown-content-thur-l]");
+                        selectDinner = document.querySelector("select[id*=dropdown-content-thur-d]");
+
+                        if (selectBreakfast.style.display === "block") {
+                            if (selectBreakfast.value) {
+                                var breakfastItems = {{ breakfast | safe }};
+                                var breakfastID = breakfastItems[selectBreakfast.value];
+                                breakfastHeader.innerHTML = `
+                                <a id="breakfast-link-thur" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectBreakfast.value}
+                                </a>`
+                                document.getElementById("breakfast-link-thur").href = document
+                                .getElementById("breakfast-link-thur")
+                                .href
+                                .replace('id', breakfastID);
+                                saveHeader(breakfastHeader.id, breakfastHeader.innerHTML);
+                            }    
+                        }
+
+                        if (selectLunch.style.display === "block") {
+                            if (selectLunch.value) {
+                                var lunchItems = {{ lunch | safe }};
+                                var lunchID = lunchItems[selectLunch.value];
+                                lunchHeader.innerHTML = `
+                                <a id="lunch-link-thur" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectLunch.value}
+                                </a>`
+                                document.getElementById("lunch-link-thur").href = document
+                                .getElementById("lunch-link-thur")
+                                .href
+                                .replace('id', lunchID);
+                                saveHeader(lunchHeader.id, lunchHeader.innerHTML);
+                            }
+                        }
+
+                        if (selectDinner.style.display === "block") {
+                            if (selectDinner.value) {
+                                var dinnerItems = {{ dinner | safe }};
+                                var dinnerID = dinnerItems[selectDinner.value];
+                                dinnerHeader.innerHTML = `
+                                <a id="dinner-link-thur" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectDinner.value}
+                                </a>`
+                                document.getElementById("dinner-link-thur").href = document
+                                .getElementById("dinner-link-thur")
+                                .href
+                                .replace('id', dinnerID);
+                                saveHeader(dinnerHeader.id, dinnerHeader.innerHTML);
+                            }
+                        }
+                        break;
+
+                    case "submit-fri":
+                        breakfastHeader = document.getElementById("fri-header-b");
+                        lunchHeader = document.getElementById("fri-header-l");
+                        dinnerHeader = document.getElementById("fri-header-d");
+
+                        selectBreakfast = document.querySelector("select[id*=dropdown-content-fri-b]");
+                        selectLunch = document.querySelector("select[id*=dropdown-content-fri-l]");
+                        selectDinner = document.querySelector("select[id*=dropdown-content-fri-d]");
+
+                        if (selectBreakfast.style.display === "block") {
+                            if (selectBreakfast.value) {
+                                var breakfastItems = {{ breakfast | safe }};
+                                var breakfastID = breakfastItems[selectBreakfast.value];
+                                breakfastHeader.innerHTML = `
+                                <a id="breakfast-link-fri" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectBreakfast.value}
+                                </a>`
+                                document.getElementById("breakfast-link-fri").href = document
+                                .getElementById("breakfast-link-fri")
+                                .href
+                                .replace('id', breakfastID);
+                                saveHeader(breakfastHeader.id, breakfastHeader.innerHTML);
+                            }    
+                        }
+
+                        if (selectLunch.style.display === "block") {
+                            if (selectLunch.value) {
+                                var lunchItems = {{ lunch | safe }};
+                                var lunchID = lunchItems[selectLunch.value];
+                                lunchHeader.innerHTML = `
+                                <a id="lunch-link-fri" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectLunch.value}
+                                </a>`
+                                document.getElementById("lunch-link-fri").href = document
+                                .getElementById("lunch-link-fri")
+                                .href
+                                .replace('id', lunchID);
+                                saveHeader(lunchHeader.id, lunchHeader.innerHTML);
+                            }
+                        }
+
+                        if (selectDinner.style.display === "block") {
+                            if (selectDinner.value) {
+                                var dinnerItems = {{ dinner | safe }};
+                                var dinnerID = dinnerItems[selectDinner.value];
+                                dinnerHeader.innerHTML = `
+                                <a id="dinner-link-fri" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectDinner.value}
+                                </a>`
+                                document.getElementById("dinner-link-fri").href = document
+                                .getElementById("dinner-link-fri")
+                                .href
+                                .replace('id', dinnerID);
+                                saveHeader(dinnerHeader.id, dinnerHeader.innerHTML);
+                            }
+                        }
+                        break;
+
+                    case "submit-sat":
+                        breakfastHeader = document.getElementById("sat-header-b");
+                        lunchHeader = document.getElementById("sat-header-l");
+                        dinnerHeader = document.getElementById("sat-header-d");
+
+                        selectBreakfast = document.querySelector("select[id*=dropdown-content-sat-b]");
+                        selectLunch = document.querySelector("select[id*=dropdown-content-sat-l]");
+                        selectDinner = document.querySelector("select[id*=dropdown-content-sat-d]");
+
+                        if (selectBreakfast.style.display === "block") {
+                            if (selectBreakfast.value) {
+                                var breakfastItems = {{ breakfast | safe }};
+                                var breakfastID = breakfastItems[selectBreakfast.value];
+                                breakfastHeader.innerHTML = `
+                                <a id="breakfast-link-sat" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectBreakfast.value}
+                                </a>`
+                                document.getElementById("breakfast-link-sat").href = document
+                                .getElementById("breakfast-link-sat")
+                                .href
+                                .replace('id', breakfastID);
+                                saveHeader(breakfastHeader.id, breakfastHeader.innerHTML);
+                            }    
+                        }
+
+                        if (selectLunch.style.display === "block") {
+                            if (selectLunch.value) {
+                                var lunchItems = {{ lunch | safe }};
+                                var lunchID = lunchItems[selectLunch.value];
+                                lunchHeader.innerHTML = `
+                                <a id="lunch-link-sat" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectLunch.value}
+                                </a>`
+                                document.getElementById("lunch-link-sat").href = document
+                                .getElementById("lunch-link-sat")
+                                .href
+                                .replace('id', lunchID);
+                                saveHeader(lunchHeader.id, lunchHeader.innerHTML);
+                            }
+                        }
+
+                        if (selectDinner.style.display === "block") {
+                            if (selectDinner.value) {
+                                var dinnerItems = {{ dinner | safe }};
+                                var dinnerID = dinnerItems[selectDinner.value];
+                                dinnerHeader.innerHTML = `
+                                <a id="dinner-link-sat" href="{{ url_for('get_recipe_by_id', recipe_id='id') }}" 
+                                class="text-decoration-none">${selectDinner.value}
+                                </a>`
+                                document.getElementById("dinner-link-sat").href = document
+                                .getElementById("dinner-link-sat")
+                                .href
+                                .replace('id', dinnerID);
+                                saveHeader(dinnerHeader.id, dinnerHeader.innerHTML);
+                            }
+                        }
+                        break;
+                }
+            });
+        });
+    </script>
+    <script src="{{ url_for('static', filename='mealplanning.js') }}"></script>
+</body>
+</html>
