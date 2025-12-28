@@ -264,6 +264,19 @@
                     }
                 }
             }
+        },
+        "/meal-plan": {
+            "get": {
+                "description": "Return a weekly meal plan with breakfast, lunch, and dinner options for each day of the week.",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation. Returns confirmation of data sent."
+                        }
+                    },
+                    "400": {
+                        "description": "Error when client attempts to get categories."
+                    }
+                }
         }
     },
     "definitions": {
