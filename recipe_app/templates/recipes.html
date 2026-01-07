@@ -41,7 +41,7 @@
             padding-right: 25px;
         }
         .pagination{
-            margin-left: 25px;
+            margin-left: 65px;
             padding-top: 25px;
         }
     </style>
@@ -136,6 +136,19 @@
             <span class="sr-only">Next</span>
         </a>
     </div>
+    <div class="pagination">
+        {% for page_num in recipes.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+                {% if recipes.page == page_num %}
+                    <a class="btn btn-info mb4" href="{{ url_for('recipes', page=page_num) }}">{{ page_num }}</a>
+                {% else %}
+                    <a class="btn btn-outline-info mb4" href="{{ url_for('recipes', page=page_num) }}">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                ...
+            {% endif %}
+        {% endfor %} 
+    </div>
     <div class="categories-section">
         <h1 class="section-title" style="font-family: 'Rubik', sans-serif;">Categories: </h1>
         <p class="section-title sub-heading" style="font-family: 'Rubik', sans-serif;">Find recipes by category</p>
@@ -171,19 +184,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="pagination">
-        {% for page_num in recipes.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-            {% if page_num %}
-                {% if recipes.page == page_num %}
-                    <a class="btn btn-info mb4" href="{{ url_for('recipes', page=page_num) }}">{{ page_num }}</a>
-                {% else %}
-                    <a class="btn btn-outline-info mb4" href="{{ url_for('recipes', page=page_num) }}">{{ page_num }}</a>
-                {% endif %}
-            {% else %}
-                ...
-            {% endif %}
-        {% endfor %} 
     </div>
 </body>
 </html>
