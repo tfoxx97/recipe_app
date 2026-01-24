@@ -100,7 +100,7 @@ def get_recipe_by_id(recipe_id):
 @app.route("/recipes/<string:category>", methods=['GET'])
 def get_recipe_by_category(category):
     page = request.args.get("page", 1, type=int)
-    recipes_by_category = Recipe.query.filter_by(category=category).paginate(page=page, per_page=10)
+    recipes_by_category = Recipe.query.filter_by(category=category).paginate(page=page, per_page=5)
     if recipes_by_category is None:
         return render_template("error_404.html")
     else:
