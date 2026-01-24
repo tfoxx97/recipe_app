@@ -7,12 +7,14 @@
     <style>
         .recipe { 
             font-family: 'Rubik', sans-serif;
-            border: 5px solid rgb(11, 216, 127); 
-            padding-left: 105px;
-            padding-right: 105px;
+            border: 5px solid rgb(11, 216, 127);
+            padding-left: 115px;
+            padding-right: 115px;
             padding-top: 25px;
             padding-bottom: 25px;
-            margin: 75px 90px;
+            /* margin: 75px 90px; */
+            width: 100%;
+            height: 100%;
         }
         .recipe h2 { margin: 0; }
         .recipe p { margin: 5px 0; }
@@ -27,6 +29,15 @@
         .carousel-control-next-icon,
         .carousel-indicators {
             filter: invert(1) grayscale(100%);
+        }
+        .carousel,
+        .carousel-item,
+        .active{
+            height: 100%;
+            margin-bottom: 60px;
+        }
+        .carousel-inner{
+            height: 100%;
         }
         .section-title {
             text-align: center;
