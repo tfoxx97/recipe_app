@@ -92,22 +92,31 @@ def logout():
 @app.route("/recipe/<recipe_id>", methods=['GET'])
 def get_recipe_by_id(recipe_id):
     recipe_by_id = Recipe.query.get_or_404(recipe_id)
+    logged_in = is_logged_in()
     if recipe_by_id is None:
         return render_template("error_404.html")
     else:
-        return render_template("recipe_by_id.html", recipe=recipe_by_id, capitalize_title=capitalize_title)
+        return render_template(
+            "recipe_by_id.html", 
+            recipe=recipe_by_id, 
+            capitalize_title=capitalize_title,
+            logged_in=logged_in
+        )
     
 @app.route("/recipes/<string:category>", methods=['GET'])
 def get_recipe_by_category(category):
     page = request.args.get("page", 1, type=int)
     recipes_by_category = Recipe.query.filter_by(category=category).paginate(page=page, per_page=5)
+    logged_in = is_logged_in()
     if recipes_by_category is None:
         return render_template("error_404.html")
     else:
         return render_template("recipe_by_category.html", 
-                               recipes=recipes_by_category, 
-                               category=category, 
-                               capitalize_title=capitalize_title)
+            recipes=recipes_by_category, 
+            category=category, 
+            capitalize_title=capitalize_title,
+            logged_in=logged_in
+        )
 
 @app.route("/index", methods=['GET'])
 def index():
@@ -249,11 +258,17 @@ def delete_recipe(rec_id):
 @app.route("/search", methods=['GET', 'POST'])
 def search():
     q = request.form.get('q')
+    logged_in = is_logged_in()
     if q:
         results = Recipe.query.filter(Recipe.name.contains(q))
     else:
         results = []
-    return render_template("search.html", results=results, capitalize_title=capitalize_title)
+    return render_template(
+        "search.html", 
+        results=results, 
+        capitalize_title=capitalize_title,
+        logged_in=logged_in
+    )
 
 #region Categories
 @app.route("/api/categories")
