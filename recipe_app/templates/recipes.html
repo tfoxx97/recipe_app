@@ -27,6 +27,15 @@
         }
         .carousel-inner {
             margin-top: 5px;
+            padding: 2rem;
+            margin: auto;
+        }
+        .carousel-indicators {
+            margin-bottom: 0;
+        }
+
+        .carousel-control-next, .carousel-control-prev {
+            width: 2rem;
         }
         .carousel-control-prev-icon,
         .carousel-control-next-icon,
@@ -60,6 +69,12 @@
         @media (min-width: 992px) {
             .navbar-nav {
                 justify-content: center;
+            }
+        }
+        @media only screen and (max-width: 576px) {
+            .recipe { 
+                padding-left: 25px;
+                padding-right: 25px;
             }
         }
     </style>
