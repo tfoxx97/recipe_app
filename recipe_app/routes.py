@@ -128,7 +128,7 @@ def index():
         for recipe in recipes:
             recipe_data = {"name": recipe.name, "id": recipe.id}
             recipe_list.append(recipe_data)
-    return render_template("recipe_list.html", recipe_list=recipe_list)
+    return render_template("index.html", recipe_list=recipe_list)
 
 #region Add Recipe
 @app.route("/add-recipe", methods=['GET', 'POST'])
