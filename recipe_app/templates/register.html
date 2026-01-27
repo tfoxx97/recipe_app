@@ -12,6 +12,7 @@
     <style>
       body {
         background: radial-gradient(circle at center, purple, black);
+        height: 100%;
       }
       p{
         font-weight: 600;
@@ -19,14 +20,20 @@
         color: silver;
       }
       .myform{
-        padding: 0 25px 0 33px;
-        padding-left: 20px;
         color: silver;
         white-space: pre;
-        margin: 0 -45px;
+        align-items: center;
+      }
+      p,
+      .myform {
+        padding-left: 25px;
+        width: 100%;
+        max-width: 420px;
+        padding: 15px;
+        margin: auto;
       }
       .myform input{
-        width: 420px;
+        width: 400px;
         position: absolute;
       }
       .form-control{
@@ -47,7 +54,7 @@
       }
       .password-container #togglePassword {
         float: right;
-        margin-left: 400px;
+        margin-left: 376px;
         margin-top: -23px;
         position: absolute;
       }
@@ -59,9 +66,35 @@
       }
       .confirm-password-container #toggleConfirmPassword {
         float: right;
-        margin-left: 400px;
+        margin-left: 376px;
         margin-top: -23px;
         position: absolute;
+      }
+      @media only screen and (max-width: 576px) {
+        p,
+        .myform {
+          margin: auto;
+        }
+        .myform input{
+          width: 300px;
+          position: absolute;
+        }
+        .password-container #togglePassword {
+          float: right;
+          margin-left: 278px;
+          margin-top: -23px;
+          position: absolute;
+        }
+        .confirm-password-container #toggleConfirmPassword {
+          float: right;
+          margin-left: 278px;
+          margin-top: -23px;
+          position: absolute;
+        }
+        .mb-5 {
+          padding-right: 50px;
+          font-size: 14px;
+        }
       }
     </style>
 </head>
@@ -81,39 +114,32 @@
 </div>
 <body>
     <a href="{{ url_for('recipes') }}" class="btn btn-dark">&laquo; Home</a>
-    <div class="container">
-      <div class="row d-flex justify-content-center mt-5">
-        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-          <div class="card py-3 px-2"  style="width: 50rem; background-color: transparent;">
-            <h2 class="fw-bold mb-2 text-uppercase" style="color: silver;">Signup</h2>
-            <p class="text-white-50 mb-5">Create an account to add, update, and delete recipes</p>
-            <form class="myform" action="/register" method="POST">
-              <div class="name-container">
-                <label>Name:</label>
-                <input type="text" name="name" required>
-              </div>
-              <div class="email-container">
-                <label>Email:</label>
-                <input type="email" name="email" required>
-              </div>
-              <div class="password-container">
-                <label>Password:</label>
-                <input type="password" type="password" name="password" id="password" required>
-                <span class="bi bi-eye-slash" id="togglePassword"></span>
-              </div>
-              <div class="confirm-password-container">
-                <label>Confirm Password:</label>
-                <input type="password" name="confirm password" id="confirm_password" required>
-                <span class="bi bi-eye-slash" id="toggleConfirmPassword"></span>
-              </div>
-              <br>
-              <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="submit">Signup</button>
-            </form>
-            <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
-          </div>
-        </div>
+    <form class="myform" action="/register" method="POST">
+      <h2 class="fw-bold mb-2 text-uppercase" style="color: silver;">Signup</h2>
+      <p class="text-white-50 mb-5">Create an account to add, update, and delete recipes</p>
+      <div class="name-container">
+        <label>Name:</label>
+        <input type="text" name="name" required>
       </div>
-    </div>
+      <div class="email-container">
+        <label>Email:</label>
+        <input type="email" name="email" required>
+      </div>
+      <div class="password-container">
+        <label>Password:</label>
+        <input type="password" type="password" name="password" id="password" required>
+        <span class="bi bi-eye-slash" id="togglePassword"></span>
+      </div>
+      <div class="confirm-password-container">
+        <label>Confirm Password:</label>
+        <input type="password" name="confirm password" id="confirm_password" required>
+        <span class="bi bi-eye-slash" id="toggleConfirmPassword"></span>
+      </div>
+      <br>
+      <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="submit">Signup</button>
+    </form>
+    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+         
     <script>
         const togglePassword = document
             .querySelector('#togglePassword');
