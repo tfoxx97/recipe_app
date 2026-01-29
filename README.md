@@ -24,6 +24,7 @@ The app also supports user authentication for features like meal planning, updat
 - **Templating:** Jinja2
 - **Database:** SQLite (via SQLAlchemy)
 - **Auth:** Flask-Login, JSON web token
+- **Documentation:** SwaggerUI
 
 ---
 
