@@ -120,15 +120,11 @@ def get_recipe_by_category(category):
 
 @app.route("/index", methods=['GET'])
 def index():
-    recipe_list = []
     recipes = Recipe.query.all()
     if recipes is None:
         return render_template("error_404.html")
-    else:
-        for recipe in recipes:
-            recipe_data = {"name": recipe.name, "id": recipe.id}
-            recipe_list.append(recipe_data)
-    return render_template("index.html", recipe_list=recipe_list)
+
+    return render_template("index.html", recipes=recipes)
 
 #region Add Recipe
 @app.route("/add-recipe", methods=['GET', 'POST'])
