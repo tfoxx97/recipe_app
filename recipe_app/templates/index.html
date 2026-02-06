@@ -15,7 +15,7 @@
 <body>
     <h1>Recipes by ID</h1>
     {% for recipe in recipes %}
-        <a class="recipe-name" href="{{ url_for('get_recipe_by_id', recipe_id=recipe.id) }}" style="color: silver;">{{ recipe.name }}, {{ recipe.id }}</a> 
+        <a class="recipe-name" href="{{ url_for('recipe_routes.get_recipe_by_id', recipe_id=recipe.id) }}" style="color: silver;">{{ recipe.name }}, {{ recipe.id }}</a> 
         <br>
         <br>
     {% endfor %}

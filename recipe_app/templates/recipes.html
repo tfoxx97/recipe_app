@@ -105,23 +105,23 @@
         <div class="collapse navbar-collapse w-100" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('add_recipe') }}">Add Recipe</a>
+                    <a class="nav-link" href="{{ url_for('recipe_routes.add_recipe') }}">Add Recipe</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('index') }}">Get Recipe by ID</a>
+                    <a class="nav-link" href="{{ url_for('recipe_routes.index') }}">Get Recipe by ID</a>
                 </li>
                 {% if logged_in %}
                     <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('get_meal_plan') }}">Meal Plan</a>
+                        <a class="nav-link" href="{{ url_for('recipe_routes.get_meal_plan') }}">Meal Plan</a>
                     </li>
                 {% endif %}
             </ul>
             {% if logged_in %}
-                <a type="button" class="btn btn-danger" href="{{ url_for('logout') }}">Logout</a>
+                <a type="button" class="btn btn-danger" href="{{ url_for('recipe_routes.logout') }}">Logout</a>
             {% else %}
-                <a type="button" class="btn btn-info" href="{{ url_for('login') }}">Login</a>
+                <a type="button" class="btn btn-info" href="{{ url_for('recipe_routes.login') }}">Login</a>
             {% endif %}
-            <form method="POST" action=" {{ url_for('search') }}" class="d-flex mr-sm-2">
+            <form method="POST" action=" {{ url_for('recipe_routes.search') }}" class="d-flex mr-sm-2">
                 <input class="form-control" type="search" placeholder="Search by recipe name" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results" hx-indicator=".loading_spinner">
                 <button class="btn btn-success" type="submit">Search</button>
             </form>
@@ -156,7 +156,7 @@
             {% for recipe in recipes.items %}
                 <div class="carousel-item {% if loop.index == 1 %} active {% endif %}" id="slide{{ loop.index }}">
                     <div class="recipe">
-                        <h2><a class="recipe-name" href="{{ url_for('get_recipe_by_id', recipe_id=recipe.id) }}" style="color: black">{{ capitalize_title(recipe.name) }}</a></h2>
+                        <h2><a class="recipe-name" href="{{ url_for('recipe_routes.get_recipe_by_id', recipe_id=recipe.id) }}" style="color: black">{{ capitalize_title(recipe.name) }}</a></h2>
                         <p><strong>Description: </strong>{{ recipe.description | safe }}</p>
                         <p><strong>Category: </strong>{{ recipe.category }}</p>
                         {% if recipe.ingredients %}
@@ -188,9 +188,9 @@
         {% for page_num in recipes.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
             {% if page_num %}
                 {% if recipes.page == page_num %}
-                    <a class="btn btn-info mb4" href="{{ url_for('recipes', page=page_num) }}">{{ page_num }}</a>
+                    <a class="btn btn-info mb4" href="{{ url_for('recipe_routes.recipes', page=page_num) }}">{{ page_num }}</a>
                 {% else %}
-                    <a class="btn btn-outline-info mb4" href="{{ url_for('recipes', page=page_num) }}">{{ page_num }}</a>
+                    <a class="btn btn-outline-info mb4" href="{{ url_for('recipe_routes.recipes', page=page_num) }}">{{ page_num }}</a>
                 {% endif %}
             {% else %}
                 ...
@@ -204,31 +204,31 @@
             <div class="card">
                 <img src="{{ url_for('static', filename='/images/breakfast.jpg') }}" class="card-img-top" alt="...">
                 <div class="card-body">
-                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('get_recipe_by_category', category='breakfast') }}" role="button">Breakfast</a></small></p>
+                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('recipe_routes.get_recipe_by_category', category='breakfast') }}" role="button">Breakfast</a></small></p>
                 </div>
             </div>
             <div class="card">
                 <img src="{{ url_for('static', filename='/images/lunch.jpg') }}" class="card-img-top" alt="...">
                 <div class="card-body">
-                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('get_recipe_by_category', category='lunch') }}" role="button">Lunch</a></small></p>
+                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('recipe_routes.get_recipe_by_category', category='lunch') }}" role="button">Lunch</a></small></p>
                 </div>
             </div>
             <div class="card">
                 <img src="{{ url_for('static', filename='/images/dinner.jpg') }}" class="card-img-top" alt="...">
                 <div class="card-body">
-                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('get_recipe_by_category', category='dinner') }}" role="button">Dinner</a></small></p>
+                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('recipe_routes.get_recipe_by_category', category='dinner') }}" role="button">Dinner</a></small></p>
                 </div>
             </div>
             <div class="card">
                 <img src="{{ url_for('static', filename='/images/appetizer.jpg') }}" class="card-img-top" alt="...">
                 <div class="card-body">
-                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('get_recipe_by_category', category='appetizer') }}" role="button">Appetizer</a></small></p>
+                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('recipe_routes.get_recipe_by_category', category='appetizer') }}" role="button">Appetizer</a></small></p>
                 </div>
             </div>
             <div class="card">
                 <img src="{{ url_for('static', filename='/images/dessert.jpg') }}" class="card-img-top" alt="...">
                 <div class="card-body">
-                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('get_recipe_by_category', category='dessert') }}" role="button">Dessert</a></small></p>
+                <p class="card-text"><small class="button-category"><a class="btn btn-primary stretched-link" href="{{ url_for('recipe_routes.get_recipe_by_category', category='dessert') }}" role="button">Dessert</a></small></p>
                 </div>
             </div>
         </div>

@@ -66,22 +66,22 @@
         <div class="collapse navbar-collapse w-100" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('add_recipe') }}">Add Recipe</a>
+                    <a class="nav-link" href="{{ url_for('recipe_routes.add_recipe') }}">Add Recipe</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('index') }}">Get Recipe by ID</a>
+                    <a class="nav-link" href="{{ url_for('recipe_routes.index') }}">Get Recipe by ID</a>
                 </li>
                 {% if logged_in %}
                     <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('get_meal_plan') }}">Meal Plan</a>
+                        <a class="nav-link" href="{{ url_for('recipe_routes.get_meal_plan') }}">Meal Plan</a>
                     </li>
                 {% endif %}
             </ul>
-            <form method="POST" action=" {{ url_for('search') }}" class="d-flex mr-sm-2">
+            <form method="POST" action=" {{ url_for('recipe_routes.search') }}" class="d-flex mr-sm-2">
                 <input class="form-control" type="search" placeholder="Search by recipe name" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results" hx-indicator=".loading_spinner">
                 <button class="btn btn-success" type="submit">Search</button>
             </form>
-            <a href="{{ url_for('recipes') }}" class="btn btn-primary">&laquo; Home</a>
+            <a href="{{ url_for('recipe_routes.recipes') }}" class="btn btn-primary">&laquo; Home</a>
         </div>
     </nav>
 </header>
@@ -89,7 +89,7 @@
         
         {% for recipe in recipes %}
         <div class="recipe">
-            <h2><a class="recipe-name" href="{{ url_for('get_recipe_by_id', recipe_id=recipe.id) }}" style="color: black">{{ capitalize_title(recipe.name) }}</a></h2>
+            <h2><a class="recipe-name" href="{{ url_for('recipe_routes.get_recipe_by_id', recipe_id=recipe.id) }}" style="color: black">{{ capitalize_title(recipe.name) }}</a></h2>
             <p><strong>Description: </strong>{{ recipe.description | safe }}</p>
             <p><strong>Category: </strong>{{ recipe.category }}</p>
             {% if recipe.ingredients %}
@@ -110,9 +110,9 @@
             {% for page_num in recipes.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                 {% if page_num %}
                     {% if recipes.page == page_num %}
-                        <a class="btn btn-info mb4" href="{{ url_for('get_recipe_by_category', category=category, page=page_num) }}">{{ page_num }}</a>
+                        <a class="btn btn-info mb4" href="{{ url_for('recipe_routes.get_recipe_by_category', category=category, page=page_num) }}">{{ page_num }}</a>
                     {% else %}
-                        <a class="btn btn-outline-info mb4" href="{{ url_for('get_recipe_by_category', category=category,  page=page_num) }}">{{ page_num }}</a>
+                        <a class="btn btn-outline-info mb4" href="{{ url_for('recipe_routes.get_recipe_by_category', category=category,  page=page_num) }}">{{ page_num }}</a>
                     {% endif %}
                 {% else %}
                     ...

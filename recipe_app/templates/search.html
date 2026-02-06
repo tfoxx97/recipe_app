@@ -62,18 +62,18 @@
         <div class="collapse navbar-collapse w-100" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('add_recipe') }}">Add Recipe</a>
+                    <a class="nav-link" href="{{ url_for('recipe_routes.add_recipe') }}">Add Recipe</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('index') }}">Get Recipe by ID</a>
+                    <a class="nav-link" href="{{ url_for('recipe_routes.index') }}">Get Recipe by ID</a>
                 </li>
                 {% if logged_in %}
                     <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('get_meal_plan') }}">Meal Plan</a>
+                        <a class="nav-link" href="{{ url_for('recipe_routes.get_meal_plan') }}">Meal Plan</a>
                     </li>
                 {% endif %}
             </ul>
-            <a href="{{ url_for('recipes') }}" class="btn btn-primary">&laquo; Home</a>
+            <a href="{{ url_for('recipe_routes.recipes') }}" class="btn btn-primary">&laquo; Home</a>
         </div>
     </nav>
 </header>

@@ -1,16 +1,19 @@
-from flask import render_template, jsonify, request, redirect, url_for, make_response, flash
+from flask import render_template, jsonify, request, redirect, url_for, make_response, flash, Blueprint
 import jwt
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
-from recipe_app import app, db
+from recipe_app import db
+from recipe_app.config import Config
 from recipe_app.models import Recipe, Ingredients, Categories, User
 from recipe_app.forms import RecipeForm, DeleteRecipeForm
 from recipe_app.utils import capitalize_title, is_logged_in, token_required, logout_early, create_recipe_dicts
 
+recipe_routes = Blueprint('recipe_routes', __name__)
+
 #region Home page
-@app.route("/")   
-@app.route("/recipes", methods=['GET'])
+@recipe_routes.route("/")   
+@recipe_routes.route("/recipes", methods=['GET'])
 def recipes():
     page = request.args.get("page", 1, type=int)
     recipes = Recipe.query.paginate(page=page, per_page=5)
@@ -27,7 +30,7 @@ def recipes():
             recipe_items=recipe_items)
 
 #region User Management
-@app.route("/login", methods=['GET', 'POST'])
+@recipe_routes.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -44,10 +47,10 @@ def login():
                     'user': user.public_id, 
                     'exp': datetime.now(timezone.utc) + timedelta(minutes=30)
                 }, 
-                app.config['SECRET_KEY'],
+                Config.SECRET_KEY,
                 algorithm="HS256"
             )
-            response = make_response(redirect(url_for('recipes')))
+            response = make_response(redirect(url_for('recipe_routes.recipes')))
             response.set_cookie('jwt_token', token)
 
             return response
@@ -56,7 +59,7 @@ def login():
 
     return render_template("login.html")
 
-@app.route("/register", methods=['GET', 'POST'])
+@recipe_routes.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         name = request.form['name']
@@ -74,22 +77,22 @@ def register():
                 db.session.add(new_user)
                 db.session.commit()
                 flash('User created successfully. Please login.')
-                return redirect(url_for('login'))
+                return redirect(url_for('recipe_routes.login'))
             else:
                 flash('Passwords do not match. Please try again', 'info')
 
     return render_template('register.html')
 
-@app.route("/logout", methods=['GET', 'DELETE'])
+@recipe_routes.route("/logout", methods=['GET', 'DELETE'])
 @token_required
 def logout():
     token = request.cookies.get('jwt_token')
     logout_early(token)
     flash("User has successfully logged out")
-    return redirect(url_for('recipes'))
+    return redirect(url_for('recipe_routes.recipes'))
 
 #region Viewing Recipes
-@app.route("/recipe/<recipe_id>", methods=['GET'])
+@recipe_routes.route("/recipe/<recipe_id>", methods=['GET'])
 def get_recipe_by_id(recipe_id):
     recipe_by_id = Recipe.query.get_or_404(recipe_id)
     logged_in = is_logged_in()
@@ -103,7 +106,7 @@ def get_recipe_by_id(recipe_id):
             logged_in=logged_in
         )
     
-@app.route("/recipes/<string:category>", methods=['GET'])
+@recipe_routes.route("/recipes/<string:category>", methods=['GET'])
 def get_recipe_by_category(category):
     page = request.args.get("page", 1, type=int)
     recipes_by_category = Recipe.query.filter_by(category=category).paginate(page=page, per_page=5)
@@ -118,7 +121,7 @@ def get_recipe_by_category(category):
             logged_in=logged_in
         )
 
-@app.route("/index", methods=['GET'])
+@recipe_routes.route("/index", methods=['GET'])
 def index():
     recipes = Recipe.query.all()
     if recipes is None:
@@ -127,7 +130,7 @@ def index():
     return render_template("index.html", recipes=recipes)
 
 #region Add Recipe
-@app.route("/add-recipe", methods=['GET', 'POST'])
+@recipe_routes.route("/add-recipe", methods=['GET', 'POST'])
 @token_required
 def add_recipe():
     ing_list = []
@@ -160,11 +163,11 @@ def add_recipe():
                                         quantity=ing['quantity'])
                 db.session.add(added_ing)
             db.session.commit()
-            return redirect(url_for('recipes'))
+            return redirect(url_for('recipe_routes.recipes'))
     return render_template("add_recipe.html", form=r_form)
 
 #region Update Recipe
-@app.route("/update-recipe/<recipe>", methods=['POST', 'GET'])
+@recipe_routes.route("/update-recipe/<recipe>", methods=['POST', 'GET'])
 @token_required
 def update_recipe(recipe):
     form = RecipeForm()
@@ -205,7 +208,7 @@ def update_recipe(recipe):
         recipe.instructions = form.instructions.data
         recipe.servings = form.servings.data
         db.session.commit()
-        return redirect(url_for('recipes'))
+        return redirect(url_for('recipe_routes.recipes'))
     elif request.method == 'GET':
         if recipe.ingredients:
             form.ingredients.entries[0].form.quantity.data = recipe.ingredients[0].quantity
@@ -226,7 +229,7 @@ def update_recipe(recipe):
     return render_template("update_recipe.html", form=form)
 
 #region Delete Recipe
-@app.route("/delete-recipe/<rec_id>", methods=['GET', 'POST'])
+@recipe_routes.route("/delete-recipe/<rec_id>", methods=['GET', 'POST'])
 @token_required
 def delete_recipe(rec_id):
     form = DeleteRecipeForm()
@@ -245,13 +248,13 @@ def delete_recipe(rec_id):
             else:
                 db.session.delete(recipe)
                 db.session.commit()
-            return redirect(url_for('recipes'))
+            return redirect(url_for('recipe_routes.recipes'))
         elif form.no.data:
-            return redirect(url_for('recipes'))
+            return redirect(url_for('recipe_routes.recipes'))
     return render_template("delete_recipe.html", form=form, recipe=recipe)
 
 #region Search page
-@app.route("/search", methods=['GET', 'POST'])
+@recipe_routes.route("/search", methods=['GET', 'POST'])
 def search():
     q = request.form.get('q')
     logged_in = is_logged_in()
@@ -267,7 +270,7 @@ def search():
     )
 
 #region Categories
-@app.route("/api/categories")
+@recipe_routes.route("/api/categories")
 def api_category():
     categories = Categories.query.all()
     cat_list = []
@@ -276,12 +279,12 @@ def api_category():
         cat_list.append(cat_data)
     return jsonify(cat_list)
 
-@app.route("/categories", methods=['GET'])
+@recipe_routes.route("/categories", methods=['GET'])
 def categories():
     return render_template("categories.html")
 
 #region Weekly Meal Plan
-@app.route("/meal-plan", methods=['POST', 'GET'])
+@recipe_routes.route("/meal-plan", methods=['POST', 'GET'])
 @token_required
 def get_meal_plan():
     breakfast, lunch, dinner = create_recipe_dicts()

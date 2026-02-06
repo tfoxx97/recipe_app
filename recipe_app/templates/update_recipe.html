@@ -26,7 +26,7 @@
 </head>
 <body>
     <h1 style="font-family: 'Rubik', sans-serif;">Update Recipe</h1>
-    <a href="{{ url_for('recipes') }}" class="btn btn-primary">&laquo; Home</a>
+    <a href="{{ url_for('recipe_routes.recipes') }}" class="btn btn-primary">&laquo; Home</a>
     <div class="content-section">
         <form method="POST" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}

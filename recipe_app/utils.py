@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import request, render_template, flash
 import jwt
-from recipe_app import app
+from recipe_app.config import Config
 from recipe_app.models import User, Recipe
 
 non_capitalized_words = ['and', 'a', 'with', 'the', 'as', 'but', 'by', 'for', 'in', 'nor', 'of', 'on', 'up']
@@ -21,7 +21,7 @@ def is_logged_in():
         return False
     
     try:
-        jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        jwt.decode(token, Config.SECRET_KEY, algorithms=["HS256"])
         return True
     except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
         return False
@@ -37,7 +37,7 @@ def token_required(func):
             return render_template("login.html")
         
         try:
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            data = jwt.decode(token, Config.SECRET_KEY, algorithms=["HS256"])
         except jwt.InvalidTokenError:
             flash("Invalid or expired token. Please login", "warning")
             return render_template("login.html")
@@ -47,7 +47,7 @@ def token_required(func):
     return decorated
 
 def logout_early(token):
-    data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+    data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
     user = User.query.filter_by(public_id=data['user']).first()
     if user:
         blocklisted_tokens.add(token)
@@ -74,3 +74,15 @@ def create_recipe_dicts():
         dinner[name] = d.id
 
     return breakfast, lunch, dinner
+
+def getCategories():
+    from recipe_app import app
+    from recipe_app.models import Categories
+
+    categories = []
+    with app.app_context():
+        all_categories = Categories.query.all()
+        for cat in all_categories:
+            categories.append((cat.name, cat.name))
+
+    return categories

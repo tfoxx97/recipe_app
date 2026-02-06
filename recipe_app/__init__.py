@@ -5,32 +5,33 @@ from flask_migrate import Migrate
 from flask_ckeditor import CKEditor
 from flask_jwt_extended import JWTManager
 from flask_swagger_ui import get_swaggerui_blueprint
+from recipe_app.config import Config
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-app.config['JWT_TOKEN_LOCATION'] = ['cookies']
-app.config['JWT_COOKIE_CSRF_PROTECT'] = True
-app.config['JWT_BLACKLIST_ENABLED'] = True
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-ckeditor = CKEditor(app)
-jwt = JWTManager(app)
-CKEDITOR_HEIGHT = 500
-CKEDITOR_ENABLE_CODESNIPPET = True
-CKEDITOR_CODE_THEME = 'mono-blue'
-SWAGGER_URL = "/docs"
-API_URL = "/static/recipe_docs.json"
-
+db = SQLAlchemy()
+migrate = Migrate()
+ckeditor = CKEditor()
+jwt = JWTManager()
 swagger_ui_blueprint = get_swaggerui_blueprint(
-    SWAGGER_URL,
-    API_URL,
+    Config.SWAGGER_URL,
+    Config.API_URL,
     config={
         'app_name': 'Recipe API'
     }
 )
-app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
-import recipe_app.routes
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    db.init_app(app)
+    ckeditor.init_app(app)
+    migrate.init_app(app, db)
+    jwt.init_app(app)
+    
+    from recipe_app.routes import recipe_routes
+    app.register_blueprint(recipe_routes)
+    app.register_blueprint(swagger_ui_blueprint, url_prefix=Config.SWAGGER_URL)
+
+    return app
+
+app = create_app()
