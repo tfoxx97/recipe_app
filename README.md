@@ -25,8 +25,11 @@ The app also supports user authentication for features like meal planning, updat
 - **Database:** SQLite (via SQLAlchemy)
 - **Auth:** Flask-Login, JSON web token
 - **Documentation:** SwaggerUI
+- **Hosting Application**: uWSGI, NGINX, Raspberry Pi
 
 ---
 
 ** additional information on different routes can be found by accesing the `/docs` route
 
+---
+You can find my application here: [App](http://tferecipes.biz)
