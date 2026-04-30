@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
     <style>
       body {
         background: radial-gradient(circle at center, purple, black);
@@ -95,38 +94,15 @@
 </div>
 <body>
     <a href="{{ url_for('recipes') }}" class="btn btn-dark">&laquo; Home</a>
-    <form class="myform" action="/login" method="POST">
-      <h2 class="fw-bold mb-2 text-uppercase" style="color: silver;">Login</h2>
-      <p class="text-white-50 mb-5">Please enter your login and password!</p>
+    <form class="myform" action="/reset-password" method="POST">
+      <p class="text-white-50 mb-5">Forgot password? Enter email address here</p>
       <div class="email-container">
         <label>Email:</label>
         <input type="email" name="email" required>
       </div>
-      <div class="password-container">
-        <label>Password:</label>
-        <input type="password" type="password" name="password" id="password" required>
-        <span class="bi bi-eye-slash" id="togglePassword"></span>
-      </div>
-      <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="submit">Login</button>
-      <br>
-      <a href="{{ url_for('reset_request') }}">Forgot Password?</a>
+      <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="submit">Submit</button>
     </form>
     
     <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
-    <script>
-        const togglePassword = document
-            .querySelector('#togglePassword');
-        const password = document.querySelector('#password');
-        togglePassword.addEventListener('click', () => {
-            // Toggle the type attribute using
-            // getAttribure() method
-            const type = password
-                .getAttribute('type') === 'password' ?
-                'text' : 'password';
-            password.setAttribute('type', type);
-            // Toggle the eye and bi-eye icon
-            this.classList.toggle('bi-eye');
-        });
-    </script>
 </body>
 </html>

@@ -80,6 +80,12 @@ def register():
 
     return render_template('register.html')
 
+@app.route("/reset-password", methods=['GET', 'POST'])
+def reset_request():
+    if request.method == 'POST':
+        flash('An email has been sent to your address with password reset instructions.', 'info')
+    return render_template("reset_request.html")
+
 @app.route("/logout", methods=['GET', 'DELETE'])
 @token_required
 def logout():
