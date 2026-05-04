@@ -1,7 +1,9 @@
 from functools import wraps
-from flask import request, render_template, flash
+from flask import request, render_template, flash, url_for
+from flask_mail import Message
 import jwt
-from recipe_app import app
+from datetime import datetime, timedelta, timezone
+from recipe_app import app, mail
 from recipe_app.models import User, Recipe
 
 non_capitalized_words = ['and', 'a', 'with', 'the', 'as', 'but', 'by', 'for', 'in', 'nor', 'of', 'on', 'up']
@@ -74,3 +76,34 @@ def create_recipe_dicts():
         dinner[name] = d.id
 
     return breakfast, lunch, dinner
+
+def get_reset_token(user: User):
+    token = jwt.encode(
+        {'user': user.id, "exp": datetime.now(timezone.utc) + timedelta(minutes=5)},
+        app.config['SECRET_KEY'], 
+        algorithm='HS256')
+    return token
+
+def send_reset_email(user: User):
+    ''' Method responsible for sending reset password email. 
+    
+    Parameters: 
+    -----------
+    user: User
+    
+    Method uses Mail object from flask extension to send reset password email to the 
+    proper recipient with a given serialized token.
+    '''
+    token = get_reset_token(user)
+    msg = Message('Password Reset Request', 
+                  sender='noreply@shreddit.com', 
+                  recipients=[user.email])
+    msg.body = f'''To reset your password, visit: {url_for('reset_token', token=token, _external=True)} 
+
+If you did not make this request, kindly disregard this email.
+
+Thank you,
+
+-Tyler
+'''
+    mail.send(msg)
