@@ -20,14 +20,13 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD')
+app.config['CKEDITOR_HEIGHT'] = 500
+app.config['CKEDITOR_CODE_THEME'] = 'mono-blue'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 ckeditor = CKEditor(app)
 jwt = JWTManager(app)
 mail = Mail(app)
-CKEDITOR_HEIGHT = 500
-CKEDITOR_ENABLE_CODESNIPPET = True
-CKEDITOR_CODE_THEME = 'mono-blue'
 SWAGGER_URL = "/docs"
 API_URL = "/static/recipe_docs.json"
 
