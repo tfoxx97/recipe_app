@@ -3,7 +3,7 @@ import jwt
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
-from recipe_app import app, db, bcrypt
+from recipe_app import app, db
 from recipe_app.models import Recipe, Ingredients, Categories, User
 from recipe_app.forms import RecipeForm, DeleteRecipeForm, RequestResetForm, ResetPasswordForm
 from recipe_app.utils import (capitalize_title, is_logged_in, token_required, logout_early, 
