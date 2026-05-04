@@ -31,3 +31,12 @@ class RecipeForm(FlaskForm):
 class DeleteRecipeForm(FlaskForm):
     yes = SubmitField('Yes')
     no = SubmitField('No')
+
+class RequestResetForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired()])
+    submit = SubmitField('Request Password Reset')
+
+class ResetPasswordForm(FlaskForm):
+    password = StringField('Password', validators=[DataRequired()])
+    confirm_password = StringField('Confirm Password', validators=[DataRequired()])
+    submit = SubmitField('Request Password Reset')
