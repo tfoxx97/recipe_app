@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_ckeditor import CKEditor
 from flask_jwt_extended import JWTManager
 from flask_swagger_ui import get_swaggerui_blueprint
+from flask_mail import Mail
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
@@ -14,15 +15,22 @@ app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 app.config['JWT_BLACKLIST_ENABLED'] = True
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 ckeditor = CKEditor(app)
 jwt = JWTManager(app)
+mail = Mail(app)
 CKEDITOR_HEIGHT = 500
 CKEDITOR_ENABLE_CODESNIPPET = True
 CKEDITOR_CODE_THEME = 'mono-blue'
 SWAGGER_URL = "/docs"
 API_URL = "/static/recipe_docs.json"
+
 
 swagger_ui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
