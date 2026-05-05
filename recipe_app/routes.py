@@ -5,8 +5,9 @@ from datetime import datetime, timedelta, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 from recipe_app import app, db
 from recipe_app.models import Recipe, Ingredients, Categories, User
-from recipe_app.forms import RecipeForm, DeleteRecipeForm
-from recipe_app.utils import capitalize_title, is_logged_in, token_required, logout_early, create_recipe_dicts
+from recipe_app.forms import RecipeForm, DeleteRecipeForm, RequestResetForm, ResetPasswordForm
+from recipe_app.utils import (capitalize_title, is_logged_in, token_required, logout_early, 
+                              create_recipe_dicts, get_reset_token, send_reset_email)
 
 #region Home page
 @app.route("/")   
@@ -79,6 +80,42 @@ def register():
                 flash('Passwords do not match. Please try again', 'info')
 
     return render_template('register.html')
+
+@app.route("/reset-password", methods=['GET', 'POST'])
+def reset_request():
+    form = RequestResetForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
+            if user:
+                get_reset_token(user)
+                send_reset_email(user)
+                flash('An email has been sent to your address with password reset instructions.', 'info')
+            else:
+                flash('No account found with that email.', 'warning')
+    return render_template("reset_request.html", form=form)
+
+@app.route("/reset-password/<token>", methods=['GET', 'POST'])
+def reset_token(token):
+    try:
+        payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        user_id = payload.get('user')
+    except jwt.ExpiredSignatureError:
+        flash('Token has expired.', 'warning')
+        return redirect(url_for('reset_request'))
+    except jwt.InvalidTokenError:
+        flash('Invalid token.', 'warning')
+        return redirect(url_for('reset_request'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.get(user_id)
+        if user:
+            hashed_password = generate_password_hash(form.password.data)
+            user.password = hashed_password
+            db.session.commit()
+            flash('Your password has been updated! You can now log in.', 'success')
+            return redirect(url_for('login'))
+    return render_template('reset_password.html', title='Reset your Password', form=form)
 
 @app.route("/logout", methods=['GET', 'DELETE'])
 @token_required
