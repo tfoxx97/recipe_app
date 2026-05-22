@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 from flask import request, render_template, flash, url_for
 from flask_mail import Message
@@ -27,6 +28,20 @@ def is_logged_in():
         return True
     except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
         return False
+    
+def get_current_user():
+    '''Returns the public id of the currently logged in user, or None if no user is logged in. '''
+    token = request.cookies.get('jwt_token')
+    if not token:
+        return None
+    if token in blocklisted_tokens:
+        return None
+    
+    try:
+        data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        return data['user']
+    except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
+        return None
 
 def token_required(func):
     '''JSON web token required in order to view this page'''
@@ -96,7 +111,7 @@ def send_reset_email(user: User):
     '''
     token = get_reset_token(user)
     msg = Message('Password Reset Request', 
-                  sender='noreply@shreddit.com', 
+                  sender='noreply@shreddit.com',
                   recipients=[user.email])
     msg.body = f'''To reset your password, visit: {url_for('reset_token', token=token, _external=True)} 
 
@@ -106,4 +121,40 @@ Thank you,
 
 -Tyler
 '''
+    mail.send(msg)
+
+def notify_admin_of_new_registration(new_user: User):
+    ''' Method responsible for sending email notification to admin when a new user registers. 
+    
+    Parameters:
+    -----------
+    new_user: User
+    
+    Method uses Mail object from flask extension to send email to admin with information about the new user.
+    '''
+    admin = User.query.filter_by(is_admin=True).first()
+
+    msg = Message('New User Registration',
+                  sender='noreply@shreddit.com',
+                  recipients=[admin.email])
+    
+    msg.body = f'''A new user {new_user.email} has registered and is awaiting approval. 
+    Please review their information and approve or deny their registration.'''
+
+    mail.send(msg)
+
+def notify_user_of_approval(user: User):
+    ''' Method responsible for sending email notification to user when their account is approved. 
+    
+    Parameters:
+    -----------
+    user: User
+    
+    Method uses Mail object from flask extension to send email to user notifying them of their account approval.
+    '''
+    msg = Message('Account Approved',
+                  sender='noreply@shreddit.com',
+                  recipients=[user.email])
+    msg.body = f'''Your account has been approved by the admin. You can now login and start adding and updating recipes.'''
+
     mail.send(msg)
