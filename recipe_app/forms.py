@@ -40,3 +40,7 @@ class ResetPasswordForm(FlaskForm):
     password = StringField('Password', validators=[DataRequired()])
     confirm_password = StringField('Confirm Password', validators=[DataRequired()])
     submit = SubmitField('Request Password Reset')
+
+class AdminApprovalForm(FlaskForm):
+    approve = SubmitField('Approve')
+    deny = SubmitField('Deny')
