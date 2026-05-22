@@ -33,3 +33,5 @@ class User(db.Model):
     name = db.Column(db.String(100))
     email = db.Column(db.String(70), unique=True)
     password = db.Column(db.String(80))
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    is_approved = db.Column(db.Boolean, nullable=False, default=False)
