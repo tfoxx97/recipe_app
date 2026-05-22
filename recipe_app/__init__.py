@@ -30,7 +30,6 @@ mail = Mail(app)
 SWAGGER_URL = "/docs"
 API_URL = "/static/recipe_docs.json"
 
-
 swagger_ui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,

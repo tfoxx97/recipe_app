@@ -5,9 +5,10 @@ from datetime import datetime, timedelta, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 from recipe_app import app, db
 from recipe_app.models import Recipe, Ingredients, Categories, User
-from recipe_app.forms import RecipeForm, DeleteRecipeForm, RequestResetForm, ResetPasswordForm
-from recipe_app.utils import (capitalize_title, is_logged_in, token_required, logout_early, 
-                              create_recipe_dicts, get_reset_token, send_reset_email)
+from recipe_app.forms import RecipeForm, DeleteRecipeForm, RequestResetForm, ResetPasswordForm, AdminApprovalForm
+from recipe_app.utils import (capitalize_title, is_logged_in, token_required, logout_early, get_current_user,
+                              create_recipe_dicts, get_reset_token, send_reset_email, notify_admin_of_new_registration,
+                              notify_user_of_approval)
 
 #region Home page
 @app.route("/")   
@@ -74,8 +75,9 @@ def register():
             if password == confirm_password:
                 db.session.add(new_user)
                 db.session.commit()
-                flash('User created successfully. Please login.')
-                return redirect(url_for('login'))
+                notify_admin_of_new_registration(new_user)
+                flash('An email has been sent to the admin for approval. You will be notified when your account is approved.', 'info')
+                return redirect(url_for('recipes'))
             else:
                 flash('Passwords do not match. Please try again', 'info')
 
@@ -124,6 +126,31 @@ def logout():
     logout_early(token)
     flash("User has successfully logged out")
     return redirect(url_for('recipes'))
+
+@app.route("/admin", methods=['GET', 'POST'])
+def admin():
+    public_id = get_current_user()
+    user = User.query.filter_by(public_id=public_id).first()
+    if user and user.is_admin:
+        pending_users = User.query.filter_by(is_approved=False).all()
+        for user in pending_users:
+            form = AdminApprovalForm(prefix=f"form_{user.id}")
+            if form.validate_on_submit():
+                if form.approve.data:
+                    flash(f"Account {user.name} has been approved", 'success')
+                    user.is_approved = True
+                    db.session.commit()
+                    notify_user_of_approval(user)
+                if form.deny.data:
+                    flash(f"Account {user.name} has been denied access", 'danger')
+                    db.session.delete(user)
+                    db.session.commit()
+        if pending_users:
+            return render_template("admin.html", pending_users=pending_users, form=form)
+        else:
+            return render_template("admin.html")
+    else:
+        return render_template("error_403.html")
 
 #region Viewing Recipes
 @app.route("/recipe/<recipe_id>", methods=['GET'])
