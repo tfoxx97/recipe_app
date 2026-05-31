@@ -196,6 +196,15 @@ def index():
 def add_recipe():
     ing_list = []
     r_form = RecipeForm()
+    uploaded_recipe = request.files.get('file')
+
+    if uploaded_recipe and uploaded_recipe.filename.endswith('.pdf'):
+        uploaded_recipe.save(uploaded_recipe.filename)
+        # pdf opener that stores text in a dictionary with keys matching the form fields
+        # example: {'name': 'Spaghetti Bolognese', 'description': 'A classic Italian dish...', 'category': 'Dinner', 'instructions': '1. Cook pasta...', 'servings': 4, 'ingredients': [{'ing_name': 'Spaghetti', 'quantity': '200g'}, {'ing_name': 'Ground Beef', 'quantity': '300g'}]}
+        # this is a placeholder for the actual implementation of the pdf parsing logic
+    elif uploaded_recipe and not uploaded_recipe.filename.endswith('.pdf'):
+        flash('Please upload a valid PDF file.', 'warning')
 
     if r_form.add_ing.data:
         r_form.ingredients.append_entry()
