@@ -1,14 +1,17 @@
+import os
 from flask import render_template, jsonify, request, redirect, url_for, make_response, flash
 import jwt
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
-from recipe_app import app, db
+from recipe_app import app, db, OPEN_AI_MODEL
 from recipe_app.models import Recipe, Ingredients, Categories, User
 from recipe_app.forms import RecipeForm, DeleteRecipeForm, RequestResetForm, ResetPasswordForm, AdminApprovalForm
 from recipe_app.utils import (capitalize_title, is_logged_in, token_required, logout_early, get_current_user,
                               create_recipe_dicts, get_reset_token, send_reset_email, notify_admin_of_new_registration,
                               notify_user_of_approval)
+from recipe_app.pdfreader.parser import Parser
+from recipe_app.pdfreader.llm_client import LLMClient
 
 #region Home page
 @app.route("/")   
@@ -197,13 +200,13 @@ def add_recipe():
     ing_list = []
     r_form = RecipeForm()
     uploaded_recipe = request.files.get('file')
-
-    if uploaded_recipe and uploaded_recipe.filename.endswith('.pdf'):
-        uploaded_recipe.save(uploaded_recipe.filename)
-        # pdf opener that stores text in a dictionary with keys matching the form fields
-        # example: {'name': 'Spaghetti Bolognese', 'description': 'A classic Italian dish...', 'category': 'Dinner', 'instructions': '1. Cook pasta...', 'servings': 4, 'ingredients': [{'ing_name': 'Spaghetti', 'quantity': '200g'}, {'ing_name': 'Ground Beef', 'quantity': '300g'}]}
-        # this is a placeholder for the actual implementation of the pdf parsing logic
-    elif uploaded_recipe and not uploaded_recipe.filename.endswith('.pdf'):
+    
+    if uploaded_recipe and os.path.splitext(uploaded_recipe.filename)[1].lower() == '.pdf':
+        parser = Parser(uploaded_recipe)
+        chunks = parser.extract_text_from_pdf(uploaded_recipe)
+        llm_client = LLMClient(OPEN_AI_MODEL, 0, chunks)
+        llm_client.autofill_data(r_form)
+    elif uploaded_recipe and not os.path.splitext(uploaded_recipe.filename)[1].lower() == '.pdf':
         flash('Please upload a valid PDF file.', 'warning')
 
     if r_form.add_ing.data:
@@ -234,7 +237,7 @@ def add_recipe():
                 db.session.add(added_ing)
             db.session.commit()
             return redirect(url_for('recipes'))
-    return render_template("add_recipe.html", form=r_form)
+    return render_template("add_recipe.html", form=r_form, uploaded_recipe=uploaded_recipe)
 
 #region Update Recipe
 @app.route("/update-recipe/<recipe>", methods=['POST', 'GET'])

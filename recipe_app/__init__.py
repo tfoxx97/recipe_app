@@ -29,6 +29,7 @@ jwt = JWTManager(app)
 mail = Mail(app)
 SWAGGER_URL = "/docs"
 API_URL = "/static/recipe_docs.json"
+OPEN_AI_MODEL = "gpt-4.1-nano"
 
 swagger_ui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
