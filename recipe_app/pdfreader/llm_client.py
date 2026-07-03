@@ -16,8 +16,6 @@ class RecipeData(BaseModel):
     ingredients: List[str] = Field(description="The ingredients found in the list. Look for the quantity and name of the ingredient.")
     instructions: str = Field(description="The instructions of the recipe found in list. Any line that appears to be a guide to making the recipe.")
 
-OPEN_AI_MODEL = "gpt-4.1-nano"
-
 class LLMClient():
     def __init__(self, model, temperature, chunks):
         self.model = model
