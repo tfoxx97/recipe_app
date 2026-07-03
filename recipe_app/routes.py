@@ -237,7 +237,7 @@ def add_recipe():
                 db.session.add(added_ing)
             db.session.commit()
             return redirect(url_for('recipes'))
-    return render_template("add_recipe.html", form=r_form, uploaded_recipe=uploaded_recipe)
+    return render_template("add_recipe.html", form=r_form)
 
 #region Update Recipe
 @app.route("/update-recipe/<recipe>", methods=['POST', 'GET'])
