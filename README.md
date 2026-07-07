@@ -14,6 +14,7 @@ The app also supports user authentication for features like meal planning, updat
 - Weekly meal planning
 - Responsive UI using Bootstrap
 - Server-side rendering with Jinja templates
+- *NEW* Auto fill data by uploading a .pdf file of your favorite recipe
 
 ---
 
@@ -23,7 +24,7 @@ The app also supports user authentication for features like meal planning, updat
 - **Frontend:** HTML, CSS, Bootstrap 4.3.1, JavaScript
 - **Templating:** Jinja2
 - **Database:** SQLite (via SQLAlchemy)
-- **Auth:** Flask-Login, JSON web token
+- **Auth:** JSON web token
 - **Documentation:** SwaggerUI
 - **Hosting Application**: uWSGI, NGINX, Raspberry Pi
 
