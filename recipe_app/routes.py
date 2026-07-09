@@ -9,7 +9,7 @@ from recipe_app.models import Recipe, Ingredients, Categories, User
 from recipe_app.forms import RecipeForm, DeleteRecipeForm, RequestResetForm, ResetPasswordForm, AdminApprovalForm
 from recipe_app.utils import (capitalize_title, is_logged_in, token_required, logout_early, get_current_user,
                               create_recipe_dicts, get_reset_token, send_reset_email, notify_admin_of_new_registration,
-                              notify_user_of_approval)
+                              notify_user_of_approval, approval_required)
 from recipe_app.pdfreader.parser import Parser
 from recipe_app.pdfreader.llm_client import LLMClient
 
@@ -196,6 +196,7 @@ def index():
 #region Add Recipe
 @app.route("/add-recipe", methods=['GET', 'POST'])
 @token_required
+@approval_required
 def add_recipe():
     ing_list = []
     r_form = RecipeForm()
@@ -242,6 +243,7 @@ def add_recipe():
 #region Update Recipe
 @app.route("/update-recipe/<recipe>", methods=['POST', 'GET'])
 @token_required
+@approval_required
 def update_recipe(recipe):
     form = RecipeForm()
     recipe = Recipe.query.get_or_404(recipe)
@@ -304,6 +306,7 @@ def update_recipe(recipe):
 #region Delete Recipe
 @app.route("/delete-recipe/<rec_id>", methods=['GET', 'POST'])
 @token_required
+@approval_required
 def delete_recipe(rec_id):
     form = DeleteRecipeForm()
     recipe = Recipe.query.get(rec_id)
@@ -359,6 +362,7 @@ def categories():
 #region Weekly Meal Plan
 @app.route("/meal-plan", methods=['POST', 'GET'])
 @token_required
+@approval_required
 def get_meal_plan():
     breakfast, lunch, dinner = create_recipe_dicts()
     return render_template(

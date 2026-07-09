@@ -1,6 +1,6 @@
 import os
 from functools import wraps
-from flask import request, render_template, flash, url_for
+from flask import request, render_template, flash, url_for, redirect
 from flask_mail import Message
 import jwt
 from datetime import datetime, timedelta, timezone
@@ -42,6 +42,20 @@ def get_current_user():
         return data['user']
     except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
         return None
+    
+def approval_required(func):
+    '''User must be approved by admin in order to access endpoint'''
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        public_id = get_current_user()
+        user = User.query.filter_by(public_id=public_id).first()
+        if user and not user.is_approved:
+            flash("Please wait until the admin has approved your access.", "warning")
+            return redirect(url_for('recipes'))
+        
+        return func(*args, **kwargs)
+    
+    return decorated
 
 def token_required(func):
     '''JSON web token required in order to view this page'''
