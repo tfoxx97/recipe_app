@@ -1,4 +1,3 @@
-import os
 from functools import wraps
 from flask import request, render_template, flash, url_for, redirect
 from flask_mail import Message
